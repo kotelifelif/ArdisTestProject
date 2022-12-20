@@ -3,7 +3,6 @@
 #include <thread>
 #include <chrono>
 #include <random>
-#include <mutex>
 
 #include <unistd.h>
 
@@ -66,7 +65,7 @@ AbstractTask create_simple_task(size_t queue_number, std::thread& delayed_thread
     simple_task.priority = 0;
     Task task(
         // Task action
-        [&] {
+        [&, simple_task] {
             std::cout << get_current_time() << ": " << simple_task.queue_name
                 << ": " << simple_task.name << ": " << simple_task.delay << " running..." << endl;
             AbstractTask delayed_task = create_delayed_task(queue_number, delayed_thread, delayed_tasks_scheduler,
@@ -95,7 +94,7 @@ AbstractTask create_delayed_task(size_t queue_number, std::thread& delayed_threa
     size_t priority_size = priority_generator(generator);
     Task task(
         // Task action
-        [&] { 
+        [&, delayed_task] { 
             std::cout << get_current_time() << ": " << delayed_task.name
                 << ": " << delayed_task.delay << " created" << endl;
             AbstractTask simple_task = create_simple_task(queue_number, delayed_thread, delayed_tasks_scheduler,
